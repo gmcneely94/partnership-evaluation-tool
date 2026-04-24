@@ -1,0 +1,883 @@
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: #F9F6F4;
+    color: #1C1917;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; padding: 32px 24px 64px; }
+
+  .header { margin-bottom: 40px; }
+  .header-top { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+  .logo-square {
+    width: 56px; height: 56px; border-radius: 10px;
+    background: #F1641E; color: white;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: bold; font-size: 26px; flex-shrink: 0;
+    box-shadow: 0 4px 0 #C14410, 0 8px 20px rgba(241, 100, 30, 0.25);
+    font-family: Georgia, serif;
+  }
+  .eyebrow {
+    font-size: 11px; text-transform: uppercase;
+    letter-spacing: 0.2em; color: #78716C;
+    margin-bottom: 4px; display: flex; align-items: center; gap: 6px;
+  }
+  .title {
+    font-family: Georgia, 'Charter', serif;
+    font-size: 36px; font-weight: 500;
+    letter-spacing: -0.02em; color: #1C1917;
+    line-height: 1.1;
+  }
+  .title em { color: #F1641E; font-style: italic; }
+  .subtitle { font-size: 14px; color: #57534E; font-style: italic; margin-top: 6px; }
+
+  .tabs {
+    display: inline-flex; gap: 4px;
+    background: #1C1917; padding: 4px; border-radius: 999px;
+  }
+  .tab {
+    padding: 8px 20px; border-radius: 999px;
+    border: none; cursor: pointer;
+    font-size: 14px; font-weight: 500;
+    color: #A8A29E; background: transparent;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .tab.active { background: #F1641E; color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .tab:hover:not(.active) { color: white; }
+
+  .card {
+    background: white; border-radius: 16px;
+    border: 1px solid #E7E5E4; padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  .partner-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px) { .partner-grid { grid-template-columns: 1fr; } }
+
+  .label {
+    display: block; font-size: 10px; font-weight: 700;
+    color: #78716C; text-transform: uppercase;
+    letter-spacing: 0.15em; margin-bottom: 8px;
+  }
+
+  input[type="text"], textarea {
+    width: 100%; padding: 12px 16px;
+    background: #FAFAF9; border: 1px solid #E7E5E4;
+    border-radius: 12px; font-size: 16px;
+    font-family: Georgia, serif;
+    transition: all 0.2s; color: #1C1917;
+  }
+  input[type="text"]:focus, textarea:focus {
+    outline: none; border-color: #F1641E; background: white;
+    box-shadow: 0 0 0 3px rgba(241, 100, 30, 0.15);
+  }
+  textarea { resize: none; line-height: 1.5; }
+
+  .summary {
+    background: linear-gradient(135deg, #1A1613 0%, #2B2420 100%);
+    border-radius: 16px; padding: 24px;
+    margin-bottom: 32px; position: sticky; top: 16px; z-index: 10;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .summary-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+  .summary-left { display: flex; align-items: baseline; gap: 20px; flex-wrap: wrap; }
+  .summary-label {
+    font-size: 10px; font-weight: 700; color: #A8A29E;
+    text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 4px;
+  }
+  .summary-score {
+    font-family: Georgia, serif; font-weight: 500;
+    font-size: 60px; letter-spacing: -0.04em; line-height: 1;
+    color: #A8A29E;
+  }
+  .summary-score.gate { color: #FBBF24; }
+  .summary-score.low { color: #FB7185; }
+  .summary-score.mid { color: #FBBF24; }
+  .summary-score.good { color: #A3E635; }
+  .summary-score.excellent { color: #34D399; }
+  .summary-score-unit { font-size: 22px; color: #78716C; font-weight: 300; }
+  .verdict-tag {
+    display: inline-block; margin-left: 10px; padding: 4px 10px;
+    border-radius: 999px; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.05em; vertical-align: middle;
+    position: relative; top: -8px;
+  }
+  .verdict-tag.v-low { background: rgba(251, 113, 133, 0.15); color: #FDA4AF; border: 1px solid rgba(251, 113, 133, 0.3); }
+  .verdict-tag.v-mid-low { background: rgba(251, 191, 36, 0.15); color: #FCD34D; border: 1px solid rgba(251, 191, 36, 0.3); }
+  .verdict-tag.v-mid { background: rgba(163, 230, 53, 0.15); color: #BEF264; border: 1px solid rgba(163, 230, 53, 0.3); }
+  .verdict-tag.v-high { background: rgba(52, 211, 153, 0.15); color: #6EE7B7; border: 1px solid rgba(52, 211, 153, 0.3); }
+
+  .verdict-banner {
+    margin-top: 20px; padding: 16px 20px;
+    border-radius: 12px; border: 1px solid;
+    display: flex; align-items: center; gap: 14px;
+  }
+  .verdict-banner.v-low { background: rgba(251, 113, 133, 0.08); border-color: rgba(251, 113, 133, 0.25); }
+  .verdict-banner.v-mid-low { background: rgba(251, 191, 36, 0.08); border-color: rgba(251, 191, 36, 0.25); }
+  .verdict-banner.v-mid { background: rgba(163, 230, 53, 0.08); border-color: rgba(163, 230, 53, 0.3); }
+  .verdict-banner.v-high { background: rgba(52, 211, 153, 0.08); border-color: rgba(52, 211, 153, 0.3); }
+  .verdict-icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; font-family: Georgia, serif; font-weight: 600; font-size: 18px;
+  }
+  .verdict-banner.v-low .verdict-icon { background: rgba(251, 113, 133, 0.2); color: #FDA4AF; }
+  .verdict-banner.v-mid-low .verdict-icon { background: rgba(251, 191, 36, 0.2); color: #FCD34D; }
+  .verdict-banner.v-mid .verdict-icon { background: rgba(163, 230, 53, 0.2); color: #BEF264; }
+  .verdict-banner.v-high .verdict-icon { background: rgba(52, 211, 153, 0.2); color: #6EE7B7; }
+  .verdict-title { font-weight: 600; font-size: 14px; margin-bottom: 2px; }
+  .verdict-banner.v-low .verdict-title { color: #FDA4AF; }
+  .verdict-banner.v-mid-low .verdict-title { color: #FCD34D; }
+  .verdict-banner.v-mid .verdict-title { color: #BEF264; }
+  .verdict-banner.v-high .verdict-title { color: #6EE7B7; }
+  .verdict-body { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.4; }
+
+  .divider-v { height: 48px; width: 1px; background: #44403C; }
+  .summary-progress { font-family: Georgia, serif; font-size: 18px; color: white; }
+  .summary-progress .muted { color: #78716C; }
+
+  .summary-buttons { display: flex; gap: 8px; }
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px; cursor: pointer;
+    font-size: 14px; font-weight: 500; border: none;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .btn-ghost { background: transparent; color: #A8A29E; }
+  .btn-ghost:hover { color: white; background: rgba(255,255,255,0.05); }
+  .btn-primary { background: #F1641E; color: white; }
+  .btn-primary:hover { background: #D9571A; }
+
+  .gate-alert {
+    margin-top: 20px; display: flex; gap: 12px; align-items: flex-start;
+    background: rgba(251, 191, 36, 0.1);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: 12px; padding: 16px;
+  }
+  .gate-alert-title { font-weight: 600; color: #FCD34D; margin-bottom: 2px; font-size: 14px; }
+  .gate-alert-body { color: rgba(253, 230, 138, 0.8); font-size: 13px; }
+
+  .progress-bar {
+    margin-top: 20px; height: 6px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 999px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 999px;
+    background: linear-gradient(90deg, #F1641E, #F59F42);
+    transition: width 0.5s;
+  }
+
+  .criterion {
+    background: white; border-radius: 16px;
+    border: 1px solid #E7E5E4; padding: 24px; margin-bottom: 16px;
+    transition: all 0.2s;
+  }
+  .criterion.scored { border-color: #D6D3D1; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+  .criterion.gate-alert-border { border-color: #FBBF24; box-shadow: 0 0 0 4px #FEF3C7; }
+
+  .criterion-header { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+  .criterion-num {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px; border-radius: 6px;
+    background: #F5F5F4; color: #78716C;
+    font-size: 12px; font-weight: bold; font-family: Georgia, serif;
+  }
+  .criterion-name {
+    font-family: Georgia, serif; font-size: 20px;
+    font-weight: 500; color: #1C1917; letter-spacing: -0.01em;
+  }
+  .gate-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 999px;
+    background: #F1641E; color: white;
+    font-size: 10px; font-weight: bold;
+    text-transform: uppercase; letter-spacing: 0.1em;
+  }
+  .weight-label {
+    margin-left: auto; font-size: 12px; color: #78716C; font-weight: 500;
+  }
+  .criterion-def { font-size: 14px; color: #57534E; font-style: italic; line-height: 1.5; margin-bottom: 16px; }
+
+  .score-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 8px; margin-bottom: 12px;
+  }
+  .score-btn {
+    padding: 14px 8px; border-radius: 12px;
+    border: 2px solid #E7E5E4; background: white;
+    cursor: pointer; transition: all 0.2s;
+    font-family: inherit; text-align: center;
+  }
+  .score-btn:hover { border-color: #A8A29E; background: #FAFAF9; }
+  .score-btn .num {
+    font-family: Georgia, serif; font-size: 24px; font-weight: 600;
+    color: #78716C; line-height: 1;
+  }
+  .score-btn .lbl { font-size: 11px; font-weight: 500; color: #78716C; margin-top: 4px; }
+
+  .score-btn.selected-1 { background: #FFE4E6; border-color: #FB7185; }
+  .score-btn.selected-1 .num, .score-btn.selected-1 .lbl { color: #881337; }
+  .score-btn.selected-2 { background: #FEF3C7; border-color: #FBBF24; }
+  .score-btn.selected-2 .num, .score-btn.selected-2 .lbl { color: #78350F; }
+  .score-btn.selected-3 { background: #ECFCCB; border-color: #A3E635; }
+  .score-btn.selected-3 .num, .score-btn.selected-3 .lbl { color: #3F6212; }
+  .score-btn.selected-4 { background: #D1FAE5; border-color: #34D399; }
+  .score-btn.selected-4 .num, .score-btn.selected-4 .lbl { color: #064E3B; }
+
+  .anchor-toggle {
+    display: inline-flex; align-items: center; gap: 4px;
+    font-size: 12px; color: #78716C; cursor: pointer;
+    margin-top: 12px; font-weight: 500;
+    background: none; border: none; padding: 0;
+    font-family: inherit; transition: color 0.2s;
+  }
+  .anchor-toggle:hover { color: #F1641E; }
+
+  .anchors-panel {
+    display: none; margin-top: 16px; padding: 16px;
+    background: #FAFAF9; border-radius: 12px;
+    grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .anchors-panel.open { display: grid; }
+  @media (max-width: 640px) { .anchors-panel.open { grid-template-columns: 1fr; } }
+
+  .anchor-row { display: flex; gap: 12px; font-size: 12px; }
+  .anchor-chip {
+    flex-shrink: 0; width: 28px; height: 28px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: Georgia, serif; font-weight: bold; border: 1px solid;
+  }
+  .anchor-chip.a-1 { background: #FFE4E6; color: #881337; border-color: #FDA4AF; }
+  .anchor-chip.a-2 { background: #FEF3C7; color: #78350F; border-color: #FCD34D; }
+  .anchor-chip.a-3 { background: #ECFCCB; color: #3F6212; border-color: #BEF264; }
+  .anchor-chip.a-4 { background: #D1FAE5; color: #064E3B; border-color: #6EE7B7; }
+  .anchor-text { color: #44403C; line-height: 1.5; padding-top: 4px; }
+
+  .rationale-textarea { margin-top: 16px; display: none; }
+  .rationale-textarea.visible { display: block; }
+
+  .section-title { font-family: Georgia, serif; font-size: 20px; font-weight: 500; color: #1C1917; margin-bottom: 20px; }
+  .rec-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 24px; }
+  .rec-pill {
+    padding: 8px 16px; border-radius: 999px;
+    background: white; color: #44403C;
+    border: 2px solid #E7E5E4; cursor: pointer;
+    font-size: 14px; font-weight: 500; font-family: inherit;
+    transition: all 0.2s;
+  }
+  .rec-pill:hover { border-color: #A8A29E; }
+  .rec-pill.selected { background: #1C1917; color: white; border-color: #1C1917; }
+
+  .notes-grid { display: grid; gap: 20px; }
+
+  .footer {
+    text-align: center; padding: 32px 0;
+    font-size: 12px; color: #78716C;
+    font-style: italic; font-family: Georgia, serif;
+  }
+  .footer-divider { display: inline-flex; align-items: center; gap: 12px; }
+  .footer-divider::before, .footer-divider::after {
+    content: ''; width: 32px; height: 1px; background: #D6D3D1;
+  }
+
+  .ref-hero { background: white; border-radius: 16px; border: 1px solid #E7E5E4; padding: 28px; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .ref-title { font-family: Georgia, serif; font-size: 24px; font-weight: 500; letter-spacing: -0.01em; margin-bottom: 12px; }
+  .ref-body { color: #44403C; line-height: 1.6; margin-bottom: 20px; }
+  .scale-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 24px; }
+  @media (max-width: 640px) { .scale-grid { grid-template-columns: repeat(2, 1fr); } }
+  .scale-box { padding: 16px; border-radius: 12px; border: 2px solid; }
+  .scale-box.s1 { background: #FFF1F2; border-color: #FECDD3; color: #881337; }
+  .scale-box.s2 { background: #FFFBEB; border-color: #FDE68A; color: #78350F; }
+  .scale-box.s3 { background: #F7FEE7; border-color: #D9F99D; color: #3F6212; }
+  .scale-box.s4 { background: #ECFDF5; border-color: #A7F3D0; color: #064E3B; }
+  .scale-num { font-family: Georgia, serif; font-size: 30px; font-weight: 600; line-height: 1; margin-bottom: 4px; }
+  .scale-lbl { font-size: 12px; font-weight: 500; }
+
+  .ref-list { background: white; border-radius: 16px; border: 1px solid #E7E5E4; overflow: hidden; margin-bottom: 24px; box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .ref-list-header { padding: 28px; border-bottom: 1px solid #E7E5E4; background: #F9F6F4; }
+  .ref-list-header p { font-size: 14px; color: #57534E; font-style: italic; margin-top: 4px; }
+  .ref-item { padding: 28px; border-bottom: 1px solid #F5F5F4; }
+  .ref-item:last-child { border-bottom: none; }
+  .ref-item:hover { background: rgba(250, 250, 249, 0.5); }
+
+  .ref-note { background: linear-gradient(135deg, #1A1613 0%, #2B2420 100%); border-radius: 16px; padding: 28px; color: white; }
+  .ref-note h2 { font-family: Georgia, serif; font-size: 20px; font-weight: 500; margin-bottom: 12px; }
+  .ref-note p { font-size: 14px; color: #D6D3D1; line-height: 1.6; }
+
+  .verdict-legend { display: grid; grid-template-columns: 1fr; gap: 8px; margin-top: 16px; }
+  .verdict-legend-row {
+    display: flex; gap: 14px; align-items: flex-start;
+    padding: 12px 14px; border-radius: 10px; border: 1px solid;
+  }
+  .vl-range {
+    flex-shrink: 0; font-family: Georgia, serif; font-weight: 600;
+    font-size: 14px; min-width: 60px;
+  }
+  .vl-text { font-size: 13px; line-height: 1.4; }
+  .vl-label { font-weight: 600; display: block; margin-bottom: 2px; }
+  .vl-desc { color: #57534E; }
+
+  .verdict-legend-row.vl-low { background: #FFF1F2; border-color: #FECDD3; }
+  .verdict-legend-row.vl-low .vl-range, .verdict-legend-row.vl-low .vl-label { color: #881337; }
+  .verdict-legend-row.vl-mid-low { background: #FFFBEB; border-color: #FDE68A; }
+  .verdict-legend-row.vl-mid-low .vl-range, .verdict-legend-row.vl-mid-low .vl-label { color: #78350F; }
+  .verdict-legend-row.vl-mid { background: #F7FEE7; border-color: #D9F99D; }
+  .verdict-legend-row.vl-mid .vl-range, .verdict-legend-row.vl-mid .vl-label { color: #3F6212; }
+  .verdict-legend-row.vl-high { background: #ECFDF5; border-color: #A7F3D0; }
+  .verdict-legend-row.vl-high .vl-range, .verdict-legend-row.vl-high .vl-label { color: #064E3B; }
+
+  .hidden { display: none !important; }
+  .icon { width: 14px; height: 14px; flex-shrink: 0; }
+  .icon-sm { width: 12px; height: 12px; }
+  .icon-lg { width: 18px; height: 18px; }
+</style>
+
+<div class="container">
+
+  <div class="header">
+    <div class="header-top">
+      <div class="logo-square">E</div>
+      <div style="flex: 1;">
+        <div class="eyebrow">
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v3m0 12v3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1M3 12h3m12 0h3M5.6 18.4l2.1-2.1m8.6-8.6l2.1-2.1"/></svg>
+          Brand Strategy · Partnerships
+        </div>
+        <h1 class="title">The Partnership <em>Rubric</em></h1>
+        <p class="subtitle">A weighted scoring ritual for evaluating brand partnerships.</p>
+      </div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-view="score" onclick="switchView('score')">Score a partner</button>
+      <button class="tab" data-view="reference" onclick="switchView('reference')">Framework reference</button>
+    </div>
+  </div>
+
+  <div id="view-score">
+    <div class="card">
+      <div class="partner-grid">
+        <div>
+          <label class="label" for="partner-name">Partner</label>
+          <input type="text" id="partner-name" placeholder="e.g. Rachel Antonoff x Susan Alexandra">
+        </div>
+        <div>
+          <label class="label" for="reviewer-name">Reviewer</label>
+          <input type="text" id="reviewer-name" placeholder="Your name">
+        </div>
+      </div>
+    </div>
+
+    <div class="summary">
+      <div class="summary-row">
+        <div class="summary-left">
+          <div>
+            <div class="summary-label">Weighted Score</div>
+            <div>
+              <span class="summary-score" id="score-display">—</span>
+              <span class="summary-score-unit">/100</span>
+              <span class="verdict-tag hidden" id="verdict-tag"></span>
+            </div>
+          </div>
+          <div class="divider-v"></div>
+          <div>
+            <div class="summary-label">Progress</div>
+            <div class="summary-progress"><span id="scored-count">0</span><span class="muted"> / 8</span></div>
+          </div>
+        </div>
+        <div class="summary-buttons">
+          <button class="btn btn-ghost" onclick="resetAll()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+            Reset
+          </button>
+          <button class="btn btn-primary" onclick="exportResults()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+      </div>
+      <div id="gate-alert-box" class="hidden"></div>
+      <div id="verdict-banner" class="hidden"></div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+
+    <div id="criteria-list"></div>
+
+    <div class="card">
+      <h2 class="section-title">Decision notes</h2>
+
+      <div style="margin-bottom: 24px;">
+        <label class="label">Recommendation</label>
+        <div class="rec-pills" id="rec-pills"></div>
+      </div>
+
+      <div class="notes-grid">
+        <div>
+          <label class="label" for="strengths">Key strengths</label>
+          <textarea id="strengths" rows="2"></textarea>
+        </div>
+        <div>
+          <label class="label" for="concerns">Key concerns</label>
+          <textarea id="concerns" rows="2"></textarea>
+        </div>
+        <div>
+          <label class="label" for="questions">Open questions</label>
+          <textarea id="questions" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span class="footer-divider">A discussion tool, not a verdict.</span>
+    </div>
+  </div>
+
+  <div id="view-reference" class="hidden">
+    <div class="ref-hero">
+      <h2 class="ref-title">How it works</h2>
+      <p class="ref-body">Eight criteria, each scored <strong>1–4</strong> and weighted. Scores are summed and normalized to <strong>100</strong>. Three criteria act as <em>gates</em> — a score of 1 on any gate flags the partnership for explicit discussion, regardless of total score.</p>
+      <div class="scale-grid">
+        <div class="scale-box s1"><div class="scale-num">1</div><div class="scale-lbl">Lean no</div></div>
+        <div class="scale-box s2"><div class="scale-num">2</div><div class="scale-lbl">Some concerns</div></div>
+        <div class="scale-box s3"><div class="scale-num">3</div><div class="scale-lbl">Good fit</div></div>
+        <div class="scale-box s4"><div class="scale-num">4</div><div class="scale-lbl">Lean yes</div></div>
+      </div>
+
+      <h2 class="ref-title" style="margin-top: 32px; margin-bottom: 8px;">What the total score means</h2>
+      <p style="font-size: 13px; color: #78716C; font-style: italic; margin-bottom: 12px;">The lowest possible score is 25 (all 1s). These bands interpret the weighted total.</p>
+      <div class="verdict-legend">
+        <div class="verdict-legend-row vl-low">
+          <div class="vl-range">25–50</div>
+          <div class="vl-text">
+            <span class="vl-label">Do not move forward</span>
+            <span class="vl-desc">Partnership is missing fundamentals. Pass, or kick back with specific feedback.</span>
+          </div>
+        </div>
+        <div class="verdict-legend-row vl-mid-low">
+          <div class="vl-range">51–62</div>
+          <div class="vl-text">
+            <span class="vl-label">Probably not a great fit</span>
+            <span class="vl-desc">Meaningful gaps. Brief discussion to see if there's a stronger version, but default is a pass.</span>
+          </div>
+        </div>
+        <div class="verdict-legend-row vl-mid">
+          <div class="vl-range">63–75</div>
+          <div class="vl-text">
+            <span class="vl-label">Explore further &amp; push</span>
+            <span class="vl-desc">Real potential, not quite there. Dig into the weakest criteria and see if the partner can meet us higher.</span>
+          </div>
+        </div>
+        <div class="verdict-legend-row vl-high">
+          <div class="vl-range">76–100</div>
+          <div class="vl-text">
+            <span class="vl-label">Definitely worth exploring</span>
+            <span class="vl-desc">Strong fit across the board. Move it forward and start shaping the opportunity.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ref-list">
+      <div class="ref-list-header">
+        <h2 class="ref-title" style="margin-bottom: 0;">Criteria &amp; weights</h2>
+        <p>All eight, in priority order.</p>
+      </div>
+      <div id="ref-criteria"></div>
+    </div>
+
+    <div class="ref-note">
+      <h2>A note on using this</h2>
+      <p>This rubric exists to structure discussion, not replace it. A high score doesn't auto-greenlight a partnership and a low score doesn't auto-kill one. The gates are here to make sure we explicitly debate the partnerships that miss something fundamental — not to reject them automatically.</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const CRITERIA = [
+    { id: "celebration", name: "Celebration at the Heart", weight: 18, gate: true,
+      definition: "The core of the idea activates against our platform around celebration vs. solely being a reach play.",
+      anchors: {
+        1: "No clear celebration angle; purely a reach or distribution play.",
+        2: "Celebration is implied or forced; feels bolted on.",
+        3: "Celebration is present and credible, if not the most distinctive element.",
+        4: "Celebration is the beating heart of the idea — without Etsy's celebration DNA, the partnership wouldn't work."
+      }},
+    { id: "audience", name: "Audience Potential", weight: 18, gate: true,
+      definition: "The partner has a stronghold with our growth audiences — Millennials and Gen Z.",
+      anchors: {
+        1: "Partner's audience doesn't meaningfully overlap with growth segments.",
+        2: "Some overlap, but partner's core audience skews outside Millennials/Gen Z.",
+        3: "Strong overlap with one growth segment (Millennials OR Gen Z).",
+        4: "Deep, authentic stronghold across both — ideally with specific segment resonance."
+      }},
+    { id: "unexpected", name: "Unexpected for Etsy", weight: 15, gate: false,
+      definition: "The partner itself is surprising in Etsy's orbit — not a predictable brand collab.",
+      anchors: {
+        1: "Completely expected; a move anyone could have guessed.",
+        2: "Familiar territory; makes sense but doesn't surprise.",
+        3: "Raises an eyebrow in a good way — fresh for us.",
+        4: "Genuinely unexpected. Earns press coverage just for existing."
+      }},
+    { id: "creative", name: "Creative Opportunity", weight: 15, gate: false,
+      definition: "The partnership unlocks an unexpected idea or execution — regardless of how expected the partner is.",
+      anchors: {
+        1: "Logo slap, sponsorship, or forced message. No creative upside.",
+        2: "Predictable execution; standard co-marketing playbook.",
+        3: "Clear creative territory to explore; some unexpected angles possible.",
+        4: "Rich creative runway — the execution itself could be the story."
+      }},
+    { id: "culture", name: "Anchored in Culture", weight: 12, gate: false,
+      definition: "The idea taps cultural or seasonal moments or consumer behaviors — ideally ones that feel unexpected or never-been-done for Etsy.",
+      anchors: {
+        1: "No clear cultural or seasonal anchor.",
+        2: "Loosely tied to a moment; could happen any time of year.",
+        3: "Anchored to a recognizable cultural moment or consumer behavior.",
+        4: "Taps a cultural ministone in a way that feels fresh or net-new for Etsy."
+      }},
+    { id: "merch", name: "Complement Our Merch", weight: 12, gate: false,
+      definition: "The idea spotlights Etsy sellers rather than overshadowing them.",
+      anchors: {
+        1: "Partner products directly compete with or overshadow Etsy sellers.",
+        2: "Sellers included but secondary to partner products.",
+        3: "Sellers meaningfully featured; partner adds context rather than competing.",
+        4: "Partnership is a showcase for Etsy sellers — partner amplifies, doesn't compete."
+      }},
+    { id: "brand", name: "Brand Health / Rep Risk", weight: 7, gate: true,
+      definition: "The partner is a brand we'd be proud to stand next to. No significant reputational baggage.",
+      anchors: {
+        1: "Active controversy, values misalignment, or rep risk that could blow back on Etsy.",
+        2: "Some concerns worth flagging; not disqualifying but warrants a gut check.",
+        3: "Clean bill of health; no red flags.",
+        4: "Actively elevates Etsy's brand — strong values alignment and positive halo."
+      }},
+    { id: "value", name: "Add Value to Top Buyers", weight: 3, gate: false,
+      definition: "Partner can add value that inspires top buyers to take action (e.g., co-funded offer tied to Apple Pay).",
+      anchors: {
+        1: "No meaningful value-add for top buyers.",
+        2: "Minor perk possible but not a key driver.",
+        3: "Clear value-add mechanism (discount, exclusive access, co-funded offer).",
+        4: "Partner can unlock a significant incentive that materially moves top-buyer behavior."
+      }}
+  ];
+
+  const SCORE_LABELS = { 1: "Lean no", 2: "Some concerns", 3: "Good fit", 4: "Lean yes" };
+  const REC_OPTIONS = ["Move forward", "Explore further", "Needs discussion", "Pass"];
+
+  let state = {
+    scores: {},
+    rationale: {},
+    recommendation: ""
+  };
+
+  function renderCriteria() {
+    const list = document.getElementById('criteria-list');
+    list.innerHTML = '';
+    CRITERIA.forEach((c, idx) => {
+      const div = document.createElement('div');
+      div.className = 'criterion';
+      div.id = `crit-${c.id}`;
+      div.innerHTML = `
+        <div class="criterion-header">
+          <span class="criterion-num">${String(idx + 1).padStart(2, '0')}</span>
+          <h3 class="criterion-name">${c.name}</h3>
+          ${c.gate ? `<span class="gate-badge">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Gate</span>` : ''}
+          <span class="weight-label">Weight ${c.weight}</span>
+        </div>
+        <p class="criterion-def">${c.definition}</p>
+        <div class="score-grid" id="scores-${c.id}">
+          ${[1,2,3,4].map(v => `
+            <button class="score-btn" data-crit="${c.id}" data-val="${v}" onclick="setScore('${c.id}', ${v})">
+              <div class="num">${v}</div>
+              <div class="lbl">${SCORE_LABELS[v]}</div>
+            </button>
+          `).join('')}
+        </div>
+        <button class="anchor-toggle" onclick="toggleAnchors('${c.id}')">
+          <span id="toggle-text-${c.id}">Show scoring anchors</span>
+          <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="anchors-panel" id="anchors-${c.id}">
+          ${[1,2,3,4].map(v => `
+            <div class="anchor-row">
+              <div class="anchor-chip a-${v}">${v}</div>
+              <div class="anchor-text">${c.anchors[v]}</div>
+            </div>
+          `).join('')}
+        </div>
+        <div class="rationale-textarea" id="rationale-wrap-${c.id}">
+          <textarea id="rationale-${c.id}" rows="2" placeholder="Rationale (optional)..." oninput="updateRationale('${c.id}', this.value)"></textarea>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  function renderRecPills() {
+    const container = document.getElementById('rec-pills');
+    container.innerHTML = REC_OPTIONS.map(opt => `
+      <button class="rec-pill" data-rec="${opt}" onclick="setRecommendation('${opt}')">${opt}</button>
+    `).join('');
+  }
+
+  function setScore(critId, value) {
+    state.scores[critId] = value;
+    const crit = CRITERIA.find(c => c.id === critId);
+
+    const btns = document.querySelectorAll(`button[data-crit="${critId}"]`);
+    btns.forEach(b => {
+      b.classList.remove('selected-1','selected-2','selected-3','selected-4');
+    });
+    const selected = document.querySelector(`button[data-crit="${critId}"][data-val="${value}"]`);
+    if (selected) selected.classList.add(`selected-${value}`);
+
+    document.getElementById(`rationale-wrap-${critId}`).classList.add('visible');
+
+    const critEl = document.getElementById(`crit-${critId}`);
+    critEl.classList.add('scored');
+    if (crit.gate && value === 1) {
+      critEl.classList.add('gate-alert-border');
+    } else {
+      critEl.classList.remove('gate-alert-border');
+    }
+
+    updateSummary();
+  }
+
+  function updateRationale(critId, val) {
+    state.rationale[critId] = val;
+  }
+
+  function toggleAnchors(critId) {
+    const panel = document.getElementById(`anchors-${critId}`);
+    const toggle = document.getElementById(`toggle-text-${critId}`);
+    panel.classList.toggle('open');
+    toggle.textContent = panel.classList.contains('open') ? 'Hide anchors' : 'Show scoring anchors';
+  }
+
+  function setRecommendation(opt) {
+    state.recommendation = opt;
+    document.querySelectorAll('.rec-pill').forEach(p => {
+      p.classList.toggle('selected', p.dataset.rec === opt);
+    });
+  }
+
+  function updateSummary() {
+    let weighted = 0;
+    let count = 0;
+    const triggered = [];
+    CRITERIA.forEach(c => {
+      const s = state.scores[c.id];
+      if (s) {
+        weighted += s * c.weight;
+        count++;
+        if (c.gate && s === 1) triggered.push(c.name);
+      }
+    });
+    const total = weighted / 4;
+    const allScored = count === CRITERIA.length;
+
+    const scoreEl = document.getElementById('score-display');
+    scoreEl.className = 'summary-score';
+    if (!allScored) {
+      scoreEl.textContent = '—';
+    } else {
+      scoreEl.textContent = total.toFixed(1);
+      if (triggered.length > 0) scoreEl.classList.add('gate');
+      else if (total >= 76) scoreEl.classList.add('excellent');
+      else if (total >= 63) scoreEl.classList.add('good');
+      else if (total >= 51) scoreEl.classList.add('mid');
+      else scoreEl.classList.add('low');
+    }
+
+    const tag = document.getElementById('verdict-tag');
+    const banner = document.getElementById('verdict-banner');
+    if (!allScored) {
+      tag.classList.add('hidden');
+      banner.classList.add('hidden');
+    } else {
+      let verdictClass, shortLabel, fullTitle, fullBody;
+      if (total <= 50) {
+        verdictClass = 'v-low';
+        shortLabel = 'Do not move forward';
+        fullTitle = 'Do not move forward';
+        fullBody = "Scoring this low means the partnership is missing fundamentals. Pass, or kick it back with specific feedback on what would need to change.";
+      } else if (total <= 62) {
+        verdictClass = 'v-mid-low';
+        shortLabel = 'Probably not a great fit';
+        fullTitle = 'Probably not a great fit';
+        fullBody = "There are meaningful gaps here. Worth a brief discussion to decide if there's a version of this partnership that could get closer, but default is a pass.";
+      } else if (total <= 75) {
+        verdictClass = 'v-mid';
+        shortLabel = 'Explore further & push';
+        fullTitle = 'Worth exploring — and pushing';
+        fullBody = "Real potential, but not quite there yet. Dig into the weakest criteria and see if the partner can meet us at a higher bar before committing.";
+      } else {
+        verdictClass = 'v-high';
+        shortLabel = 'Definitely worth exploring';
+        fullTitle = 'Definitely worth exploring';
+        fullBody = "Strong fit across the board. Move this forward and start shaping the opportunity.";
+      }
+      tag.className = `verdict-tag ${verdictClass}`;
+      tag.textContent = shortLabel;
+      banner.className = `verdict-banner ${verdictClass}`;
+      const iconLetter = verdictClass === 'v-low' ? '✕' : verdictClass === 'v-mid-low' ? '?' : verdictClass === 'v-mid' ? '↗' : '✓';
+      banner.innerHTML = `
+        <div class="verdict-icon">${iconLetter}</div>
+        <div>
+          <div class="verdict-title">${fullTitle}</div>
+          <div class="verdict-body">${fullBody}</div>
+        </div>
+      `;
+    }
+
+    document.getElementById('scored-count').textContent = count;
+    document.getElementById('progress-fill').style.width = `${(count / CRITERIA.length) * 100}%`;
+
+    const alertBox = document.getElementById('gate-alert-box');
+    if (triggered.length > 0) {
+      alertBox.classList.remove('hidden');
+      alertBox.className = 'gate-alert';
+      alertBox.innerHTML = `
+        <svg class="icon-lg" viewBox="0 0 24 24" fill="none" stroke="#FBBF24" stroke-width="2" style="flex-shrink:0; margin-top: 2px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <div>
+          <div class="gate-alert-title">Gate triggered — let's talk about it</div>
+          <div class="gate-alert-body">${triggered.join(' · ')}</div>
+        </div>
+      `;
+    } else {
+      alertBox.classList.add('hidden');
+    }
+  }
+
+  function resetAll() {
+    if (!confirm('Reset all scores and notes for this partner?')) return;
+    state = { scores: {}, rationale: {}, recommendation: "" };
+    document.getElementById('partner-name').value = '';
+    document.getElementById('reviewer-name').value = '';
+    document.getElementById('strengths').value = '';
+    document.getElementById('concerns').value = '';
+    document.getElementById('questions').value = '';
+    document.querySelectorAll('.score-btn').forEach(b => {
+      b.classList.remove('selected-1','selected-2','selected-3','selected-4');
+    });
+    document.querySelectorAll('.rec-pill').forEach(p => p.classList.remove('selected'));
+    document.querySelectorAll('.criterion').forEach(c => {
+      c.classList.remove('scored','gate-alert-border');
+    });
+    document.querySelectorAll('.rationale-textarea').forEach(r => r.classList.remove('visible'));
+    document.querySelectorAll('textarea[id^="rationale-"]').forEach(t => t.value = '');
+    document.querySelectorAll('.anchors-panel').forEach(p => p.classList.remove('open'));
+    document.querySelectorAll('[id^="toggle-text-"]').forEach(t => t.textContent = 'Show scoring anchors');
+    updateSummary();
+  }
+
+  function exportResults() {
+    const partner = document.getElementById('partner-name').value;
+    const reviewer = document.getElementById('reviewer-name').value;
+    const strengths = document.getElementById('strengths').value;
+    const concerns = document.getElementById('concerns').value;
+    const questions = document.getElementById('questions').value;
+
+    let weighted = 0;
+    let count = 0;
+    const triggered = [];
+    CRITERIA.forEach(c => {
+      const s = state.scores[c.id];
+      if (s) {
+        weighted += s * c.weight;
+        count++;
+        if (c.gate && s === 1) triggered.push(c.name);
+      }
+    });
+    const allScored = count === CRITERIA.length;
+    const total = weighted / 4;
+
+    let verdict = '';
+    if (allScored) {
+      if (total <= 50) verdict = 'Do not move forward';
+      else if (total <= 62) verdict = 'Probably not a great fit';
+      else if (total <= 75) verdict = 'Explore further & push';
+      else verdict = 'Definitely worth exploring';
+    }
+
+    const lines = [];
+    lines.push("ETSY PARTNERSHIP EVALUATION");
+    lines.push("=".repeat(50));
+    lines.push(`Partner: ${partner || '—'}`);
+    lines.push(`Reviewer: ${reviewer || '—'}`);
+    lines.push(`Date: ${new Date().toLocaleDateString()}`);
+    lines.push('');
+    lines.push(`TOTAL SCORE: ${allScored ? total.toFixed(1) : 'Incomplete'} / 100`);
+    if (verdict) lines.push(`VERDICT: ${verdict}`);
+    if (triggered.length > 0) lines.push(`⚠ GATES TRIGGERED: ${triggered.join(', ')}`);
+    lines.push('');
+    lines.push('SCORES');
+    lines.push('-'.repeat(50));
+    CRITERIA.forEach(c => {
+      const s = state.scores[c.id];
+      const tag = c.gate ? ' [GATE]' : '';
+      lines.push(`${c.name}${tag} (weight ${c.weight})`);
+      lines.push(`  Score: ${s || '—'}/4${s ? ' — ' + SCORE_LABELS[s] : ''}`);
+      if (state.rationale[c.id]) lines.push(`  Rationale: ${state.rationale[c.id]}`);
+      lines.push('');
+    });
+    lines.push('DECISION NOTES');
+    lines.push('-'.repeat(50));
+    lines.push(`Recommendation: ${state.recommendation || '—'}`);
+    lines.push(`Key strengths: ${strengths || '—'}`);
+    lines.push(`Key concerns: ${concerns || '—'}`);
+    lines.push(`Open questions: ${questions || '—'}`);
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${(partner || 'partner').replace(/\s+/g, '_')}_evaluation.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function switchView(which) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === which));
+    document.getElementById('view-score').classList.toggle('hidden', which !== 'score');
+    document.getElementById('view-reference').classList.toggle('hidden', which !== 'reference');
+  }
+
+  function renderReference() {
+    const container = document.getElementById('ref-criteria');
+    container.innerHTML = CRITERIA.map((c, idx) => `
+      <div class="ref-item">
+        <div class="criterion-header">
+          <span class="criterion-num">${String(idx + 1).padStart(2, '0')}</span>
+          <h3 class="criterion-name">${c.name}</h3>
+          ${c.gate ? `<span class="gate-badge">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Gate</span>` : ''}
+          <span class="weight-label">Weight ${c.weight}</span>
+        </div>
+        <p class="criterion-def">${c.definition}</p>
+        <div class="anchors-panel open" style="margin-top: 16px; background: transparent; padding: 0;">
+          ${[1,2,3,4].map(v => `
+            <div class="anchor-row">
+              <div class="anchor-chip a-${v}">${v}</div>
+              <div class="anchor-text">${c.anchors[v]}</div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  renderCriteria();
+  renderRecPills();
+  renderReference();
+  updateSummary();
+</script>
